@@ -1,0 +1,9 @@
+version: "3.7"
+services:
+  fhrs:
+    build: .
+    volumes:
+      - ./:/go/src/github.com/dcrichards/go-fhrs
+    environment:
+      - CGO_ENABLED=0
+    command: "go test -coverprofile=coverage.out ./..."
