@@ -10,7 +10,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	establishment, err := client.Establishments.GetByID("82940")
 	if err != nil {
 		log.Fatal(err)

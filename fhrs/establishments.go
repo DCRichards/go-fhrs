@@ -3,9 +3,9 @@ package fhrs
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -19,9 +19,9 @@ type EstablishmentsInstance service
 // the cases which do not have specific errors.
 type APIError struct {
 	Method     string
-	URL		   string
+	URL        string
 	StatusCode int
-	Message	   string
+	Message    string
 }
 
 func (e APIError) Error() string {
@@ -36,14 +36,14 @@ type Timestamp struct {
 
 func (t *Timestamp) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), "\"")
-    if s == "null" || s == "" || s == "undefined" {
+	if s == "null" || s == "" || s == "undefined" {
 		*t = Timestamp{time.Time{}}
 		return nil
-    }
+	}
 
 	parsed, err := time.Parse("2006-01-02T15:04:05", s)
 	if err != nil {
-		return err	
+		return err
 	}
 
 	*t = Timestamp{parsed}
@@ -156,10 +156,10 @@ func (s *EstablishmentsInstance) GetByID(id string) (*Establishment, error) {
 		}
 
 		return nil, APIError{
-			Method: req.Method,
-			URL: req.URL.String(),
+			Method:     req.Method,
+			URL:        req.URL.String(),
 			StatusCode: res.StatusCode,
-			Message: errorResponse.Message,
+			Message:    errorResponse.Message,
 		}
 	}
 

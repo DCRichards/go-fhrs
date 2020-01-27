@@ -67,39 +67,39 @@ func TestGetByID(t *testing.T) {
 	}`
 
 	expected := &Establishment{
-		FHRSID: 82940,
-		LocalAuthorityBusinessID: "2019",
-		BusinessName: "Ali's",
-		BusinessType: "Restaurant/Cafe/Canteen",
-		BusinessTypeID: 1,
-		AddressLine1: "89 Commercial Road",
-		AddressLine2: "Portsmouth",
-		PostCode: "PO1 1BA",
-		RatingValue: "3",
-		RatingKey: "fhrs_3_en-gb",
-		LocalAuthorityCode: "876",
-		LocalAuthorityName: "Portsmouth",
-		LocalAuthorityWebSite: "http://www.portsmouth.gov.uk",
+		FHRSID:                     82940,
+		LocalAuthorityBusinessID:   "2019",
+		BusinessName:               "Ali's",
+		BusinessType:               "Restaurant/Cafe/Canteen",
+		BusinessTypeID:             1,
+		AddressLine1:               "89 Commercial Road",
+		AddressLine2:               "Portsmouth",
+		PostCode:                   "PO1 1BA",
+		RatingValue:                "3",
+		RatingKey:                  "fhrs_3_en-gb",
+		LocalAuthorityCode:         "876",
+		LocalAuthorityName:         "Portsmouth",
+		LocalAuthorityWebSite:      "http://www.portsmouth.gov.uk",
 		LocalAuthorityEmailAddress: "public.protection@portsmouthcc.gov.uk",
-		Scores: Scores{},
-		SchemeType: "FHRS",
+		Scores:                     Scores{},
+		SchemeType:                 "FHRS",
 		Geocode: Geocode{
 			Longitude: "-1.09159100055695",
-			Latitude: "50.7984199523926",
+			Latitude:  "50.7984199523926",
 		},
 		NewRatingPending: false,
 		Meta: Meta{
 			DataSource: "Lucene",
-			ItemCount: 0,
+			ItemCount:  0,
 			Returncode: "OK",
 			TotalCount: 1,
 			TotalPages: 1,
-			PageSize: 1,
+			PageSize:   1,
 			PageNumber: 1,
 		},
 		Links: []Link{
 			{
-				Rel: "self",
+				Rel:  "self",
 				Href: "http://api.ratings.food.gov.uk/establishments/82940",
 			},
 		},
@@ -124,7 +124,7 @@ func TestGetByID(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(expected, actual) {
-		t.Errorf("Expected:\n%+v\nBut got:\n%+v\n", expected, actual)	
+		t.Errorf("Expected:\n%+v\nBut got:\n%+v\n", expected, actual)
 	}
 }
 

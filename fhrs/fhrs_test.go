@@ -13,7 +13,7 @@ func getTestEnv() (*Client, *httptest.Server, *http.ServeMux, error) {
 	server := httptest.NewUnstartedServer(router)
 
 	// We need to assign our own listener here as server.URL
-	// returns nil until it's started. We assign 
+	// returns nil until it's started. We assign
 	// a blank port so that it is randomised, as per
 	// https://golang.org/pkg/net/#Listen
 	listener, err := net.Listen("tcp", "127.0.0.1:")
