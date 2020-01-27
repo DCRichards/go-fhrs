@@ -11,6 +11,8 @@ go get -u github.com/dcrichards/go-fhrs
 ```
 
 ```go
+package main
+
 import (
         "github.com/dcrichards/go-fhrs/fhrs"
 )
@@ -18,12 +20,12 @@ import (
 func main() {
         client, err := fhrs.NewClient()
         if err != nil {
-          // Handle err
+                // Handle err
         }
         
         est, err := client.Establishments.GetByID("82940")
         if err != nil {
-          // Handle err
+                // Handle err
         }
         
         // Do stuff with est
