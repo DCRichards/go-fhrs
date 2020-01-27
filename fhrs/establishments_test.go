@@ -1,6 +1,9 @@
 package fhrs
 
 import (
+	"errors"
+	"fmt"
+	"github.com/julienschmidt/httprouter"
 	"io"
 	"net/http"
 	"reflect"
@@ -107,14 +110,20 @@ func TestGetByID(t *testing.T) {
 	expected.RatingDate.Time, _ = time.Parse("2006-01-02T15:04:05", "2019-08-06T00:00:00")
 	expected.Meta.ExtractDate.Time, _ = time.Parse("2006-01-02T15:04:05", "0001-01-01T00:00:00")
 
-	router.HandleFunc("/Establishments/1", func(w http.ResponseWriter, r *http.Request) {
+	const idQuery = "1"
+
+	router.GET("/Establishments/:id", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		if q := p.ByName("id"); q != idQuery {
+			t.Errorf("Expected ID to be %s but got %s", idQuery, q)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		io.WriteString(w, body)
 	})
 
 	server.Start()
 
-	actual, err := client.Establishments.GetByID("1")
+	actual, err := client.Establishments.GetByID(idQuery)
 	if err != nil {
 		t.Error(err)
 	}
@@ -128,6 +137,42 @@ func TestGetByID(t *testing.T) {
 	}
 }
 
+func TestGetByID_BadRequest(t *testing.T) {
+	client, server, router, err := getTestEnv()
+	if err != nil {
+		t.Error(err)
+	}
+
+	defer server.Close()
+
+	const idQuery = "AAAA"
+	const errorMessage = "The request is invalid"
+
+	body := fmt.Sprintf(`{ "Message": "%s" }`, errorMessage)
+
+	router.GET("/Establishments/:id", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		if q := p.ByName("id"); q != idQuery {
+			t.Errorf("Expected ID to be %s but got %s", idQuery, q)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, body)
+	})
+
+	server.Start()
+
+	_, err = client.Establishments.GetByID(idQuery)
+	var apiError APIError
+	if errors.As(err, &apiError) {
+		if apiError.Message != errorMessage {
+			t.Errorf("Expected err.Message to be %s but got %s", errorMessage, apiError.Message)
+		}
+	} else {
+		t.Errorf("Expected err to be APIError but type is %T", err)
+	}
+}
+
 func TestGetByID_NotFound(t *testing.T) {
 	client, server, router, err := getTestEnv()
 	if err != nil {
@@ -136,11 +181,15 @@ func TestGetByID_NotFound(t *testing.T) {
 
 	defer server.Close()
 
-	body := `{
-		"Message": "No establishment found with EstablishmentId: 0"
-	}`
+	body := `{ "Message": "No establishment found with EstablishmentId: 0" }`
 
-	router.HandleFunc("/Establishments/0", func(w http.ResponseWriter, r *http.Request) {
+	const idQuery = "0"
+
+	router.GET("/Establishments/:id", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		if q := p.ByName("id"); q != idQuery {
+			t.Errorf("Expected ID to be %s but got %s", idQuery, q)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
 		io.WriteString(w, body)
@@ -148,7 +197,7 @@ func TestGetByID_NotFound(t *testing.T) {
 
 	server.Start()
 
-	est, err := client.Establishments.GetByID("0")
+	est, err := client.Establishments.GetByID(idQuery)
 	if err != nil {
 		t.Error(err)
 	}

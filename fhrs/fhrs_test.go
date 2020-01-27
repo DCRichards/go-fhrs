@@ -1,15 +1,15 @@
 package fhrs
 
 import (
+	"github.com/julienschmidt/httprouter"
 	"net"
-	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 )
 
-func getTestEnv() (*Client, *httptest.Server, *http.ServeMux, error) {
-	router := http.NewServeMux()
+func getTestEnv() (*Client, *httptest.Server, *httprouter.Router, error) {
+	router := httprouter.New()
 	server := httptest.NewUnstartedServer(router)
 
 	// We need to assign our own listener here as server.URL
