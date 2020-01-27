@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func setup() (*Client, *httptest.Server, *http.ServeMux, error) {
+func getTestEnv() (*Client, *httptest.Server, *http.ServeMux, error) {
 	router := http.NewServeMux()
 	server := httptest.NewUnstartedServer(router)
 

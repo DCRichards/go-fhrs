@@ -9,6 +9,27 @@ import (
 	"time"
 )
 
+type EstablishmentsService interface {
+	GetByID(id string) (*Establishment, error)
+}
+
+type EstablishmentsInstance service
+
+// APIError encapsulated a general error coming from an API request. This is for
+// the cases which do not have specific errors.
+type APIError struct {
+	Method     string
+	URL		   string
+	StatusCode int
+	Message	   string
+}
+
+func (e APIError) Error() string {
+	return fmt.Sprintf("API Error: %s %s returned status %d. %s", e.Method, e.URL, e.StatusCode, e.Message)
+}
+
+// Timestamp is a representation of the date/time format used throughout
+// the API. It is a subset of RFC 3339, with the timezone (Zulu) omitted.
 type Timestamp struct {
 	time.Time
 }
@@ -30,14 +51,8 @@ func (t *Timestamp) UnmarshalJSON(b []byte) error {
 }
 
 func (t *Timestamp) MarshalJSON() ([]byte, error) {
-	return []byte(t.Time.Format("2006-01-02T15:04:05")), nil
+	return json.Marshal(t.Time.Format("2008-01-02T15:04:05"))
 }
-
-type EstablishmentsService interface {
-	GetByID(id string) (*Establishment, error)
-}
-
-type EstablishmentsInstance service
 
 type ErrorResponse struct {
 	Message string `json:"Message"`
@@ -46,13 +61,13 @@ type ErrorResponse struct {
 type Establishments struct {
 	Establishments []Establishment `json:"establishments"`
 	Meta           Meta            `json:"meta"`
-	Links          []Links         `json:"links"`
+	Links          []Link          `json:"links"`
 }
 
 type Scores struct {
-	Hygiene                int `json:"Hygiene"`
-	Structural             int `json:"Structural"`
-	ConfidenceInManagement int `json:"ConfidenceInManagement"`
+	Hygiene                *int `json:"Hygiene"`
+	Structural             *int `json:"Structural"`
+	ConfidenceInManagement *int `json:"ConfidenceInManagement"`
 }
 
 type Geocode struct {
@@ -71,7 +86,7 @@ type Meta struct {
 	PageNumber  int       `json:"pageNumber"`
 }
 
-type Links struct {
+type Link struct {
 	Rel  string `json:"rel"`
 	Href string `json:"href"`
 }
@@ -99,10 +114,10 @@ type Establishment struct {
 	SchemeType                 string    `json:"SchemeType"`
 	Geocode                    Geocode   `json:"geocode"`
 	RightToReply               string    `json:"RightToReply"`
-	Distance                   float64   `json:"Distance"`
+	Distance                   *float64  `json:"Distance"`
 	NewRatingPending           bool      `json:"NewRatingPending"`
 	Meta                       Meta      `json:"meta"`
-	Links                      []Links   `json:"links"`
+	Links                      []Link    `json:"links"`
 }
 
 // GetByID returns an establishment with the given FHRSID.
@@ -126,7 +141,27 @@ func (s *EstablishmentsInstance) GetByID(id string) (*Establishment, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer res.Body.Close()
+
+	switch {
+	// 404: Simply return nil to denote nothing to return.
+	case res.StatusCode == http.StatusNotFound:
+		return nil, nil
+	// Otherwise parse and return general API error.
+	case res.StatusCode < 200 || res.StatusCode >= 300:
+		var errorResponse ErrorResponse
+		if err := json.NewDecoder(res.Body).Decode(&errorResponse); err != nil {
+			return nil, err
+		}
+
+		return nil, APIError{
+			Method: req.Method,
+			URL: req.URL.String(),
+			StatusCode: res.StatusCode,
+			Message: errorResponse.Message,
+		}
+	}
 
 	var establishment Establishment
 	if err := json.NewDecoder(res.Body).Decode(&establishment); err != nil {
