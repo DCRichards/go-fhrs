@@ -1,58 +1,13 @@
 package fhrs
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
 )
 
+// EstablishmentsService encapsulates the Establishments methods of the API.
+//
+// https://api.ratings.food.gov.uk/help#Establishments
 type EstablishmentsService service
-
-// APIError encapsulated a general error coming from an API request. This is for
-// the cases which do not have specific errors.
-type APIError struct {
-	Method     string
-	URL        string
-	StatusCode int
-	Message    string
-}
-
-func (e APIError) Error() string {
-	return fmt.Sprintf("API Error: %s %s returned status %d. %s", e.Method, e.URL, e.StatusCode, e.Message)
-}
-
-// Timestamp is a representation of the date/time format used throughout
-// the API. It is a subset of RFC 3339, with the timezone (Zulu) omitted.
-type Timestamp struct {
-	time.Time
-}
-
-func (t *Timestamp) UnmarshalJSON(b []byte) error {
-	s := strings.Trim(string(b), "\"")
-	if s == "null" || s == "" || s == "undefined" {
-		*t = Timestamp{time.Time{}}
-		return nil
-	}
-
-	parsed, err := time.Parse("2006-01-02T15:04:05", s)
-	if err != nil {
-		return err
-	}
-
-	*t = Timestamp{parsed}
-	return nil
-}
-
-func (t *Timestamp) MarshalJSON() ([]byte, error) {
-	return json.Marshal(t.Time.Format("2008-01-02T15:04:05"))
-}
-
-type ErrorResponse struct {
-	Message string `json:"Message"`
-}
 
 type Establishments struct {
 	Establishments []Establishment `json:"establishments"`
@@ -120,49 +75,10 @@ type Establishment struct {
 //
 // https://api.ratings.food.gov.uk/Help/Api/GET-Establishments-id
 func (s *EstablishmentsService) GetByID(id string) (*Establishment, error) {
-	url, err := s.client.baseURL.Parse(fmt.Sprintf("Establishments/%s", id))
-	if err != nil {
+	var establishment *Establishment
+	if err := s.client.get(fmt.Sprintf("Establishments/%s", id), &establishment); err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", url.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("x-api-version", strconv.Itoa(s.client.version))
-	req.Header.Set("Accept-Language", s.client.language.String())
-
-	res, err := s.client.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer res.Body.Close()
-
-	switch {
-	// 404: Simply return nil to denote nothing to return.
-	case res.StatusCode == http.StatusNotFound:
-		return nil, nil
-	// Otherwise parse and return general API error.
-	case res.StatusCode < 200 || res.StatusCode >= 300:
-		var errorResponse ErrorResponse
-		if err := json.NewDecoder(res.Body).Decode(&errorResponse); err != nil {
-			return nil, err
-		}
-
-		return nil, APIError{
-			Method:     req.Method,
-			URL:        req.URL.String(),
-			StatusCode: res.StatusCode,
-			Message:    errorResponse.Message,
-		}
-	}
-
-	var establishment Establishment
-	if err := json.NewDecoder(res.Body).Decode(&establishment); err != nil {
-		return nil, err
-	}
-
-	return &establishment, nil
+	return establishment, nil
 }
