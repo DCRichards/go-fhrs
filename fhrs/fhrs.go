@@ -15,8 +15,8 @@ const (
 type APILanguage int
 
 const (
-	English APILanguage = iota
-	Cymraeg
+	English APILanguage = iota // English (en-GB)
+	Cymraeg					   // Welsh (cy-GB)
 )
 
 func (l APILanguage) String() string {
