@@ -17,6 +17,7 @@ func TestGetByID(t *testing.T) {
 		t.Error(err)
 	}
 
+	server.Start()
 	defer server.Close()
 
 	body := `{
@@ -110,7 +111,7 @@ func TestGetByID(t *testing.T) {
 	expected.RatingDate.Time, _ = time.Parse("2006-01-02T15:04:05", "2019-08-06T00:00:00")
 	expected.Meta.ExtractDate.Time, _ = time.Parse("2006-01-02T15:04:05", "0001-01-01T00:00:00")
 
-	const idQuery = "1"
+	idQuery := "1"
 
 	router.GET("/Establishments/:id", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		if q := p.ByName("id"); q != idQuery {
@@ -120,8 +121,6 @@ func TestGetByID(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		io.WriteString(w, body)
 	})
-
-	server.Start()
 
 	actual, err := client.Establishments.GetByID(idQuery)
 	if err != nil {
@@ -143,11 +142,11 @@ func TestGetByID_BadRequest(t *testing.T) {
 		t.Error(err)
 	}
 
+	server.Start()
 	defer server.Close()
 
-	const idQuery = "AAAA"
-	const errorMessage = "The request is invalid"
-
+	idQuery := "AAAA"
+	errorMessage := "The request is invalid"
 	body := fmt.Sprintf(`{ "Message": "%s" }`, errorMessage)
 
 	router.GET("/Establishments/:id", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -159,8 +158,6 @@ func TestGetByID_BadRequest(t *testing.T) {
 		w.WriteHeader(http.StatusBadRequest)
 		io.WriteString(w, body)
 	})
-
-	server.Start()
 
 	_, err = client.Establishments.GetByID(idQuery)
 	var apiError APIError
@@ -179,11 +176,11 @@ func TestGetByID_NotFound(t *testing.T) {
 		t.Error(err)
 	}
 
+	server.Start()
 	defer server.Close()
 
+	idQuery := "0"
 	body := `{ "Message": "No establishment found with EstablishmentId: 0" }`
-
-	const idQuery = "0"
 
 	router.GET("/Establishments/:id", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		if q := p.ByName("id"); q != idQuery {
@@ -195,8 +192,6 @@ func TestGetByID_NotFound(t *testing.T) {
 		io.WriteString(w, body)
 	})
 
-	server.Start()
-
 	est, err := client.Establishments.GetByID(idQuery)
 	if err != nil {
 		t.Error(err)
@@ -204,5 +199,42 @@ func TestGetByID_NotFound(t *testing.T) {
 
 	if est != nil {
 		t.Errorf("Expected response to be nil, but got %v", est)
+	}
+}
+
+func TestGetByID_Headers(t *testing.T) {
+	client, server, router, err := getTestEnv()
+	if err != nil {
+		t.Error(err)
+	}
+
+	server.Start()
+	defer server.Close()
+
+	idQuery := "21188"
+	// 🏴 󠁧󠁢󠁷󠁬󠁳󠁿Sorry Welsh API developers, the message is always in English. I checked.
+	body := `{ "Message": "No establishment found with EstablishmentId: 21188" }`
+
+	router.GET("/Establishments/:id", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		if ah := r.Header.Get("x-api-version"); ah != "2" {
+			t.Errorf("Expected x-api-version to be 2 but got %s", ah)
+		}
+
+		if lh := r.Header.Get("Accept-Language"); lh != "cy-GB" {
+			t.Errorf("Expected Accept-Language to be cy-GB but got %s", lh)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		io.WriteString(w, body)
+	})
+
+	if err := client.SetLanguage(Cymraeg); err != nil {
+		t.Error(err)
+	}
+
+	_, err = client.Establishments.GetByID(idQuery)
+	if err != nil {
+		t.Error(err)
 	}
 }
