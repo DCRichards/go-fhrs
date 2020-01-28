@@ -212,7 +212,7 @@ func TestGetByID_Headers(t *testing.T) {
 	defer server.Close()
 
 	idQuery := "21188"
-	// 🏴 󠁧󠁢󠁷󠁬󠁳󠁿Sorry Welsh API developers, the message is always in English. I checked.
+	// 󠁧󠁢󠁷󠁬󠁳󠁿Sorry Welsh API developers, the message is always in English. I checked.
 	body := `{ "Message": "No establishment found with EstablishmentId: 21188" }`
 
 	router.GET("/Establishments/:id", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
