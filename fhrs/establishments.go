@@ -9,11 +9,7 @@ import (
 	"time"
 )
 
-type EstablishmentsService interface {
-	GetByID(id string) (*Establishment, error)
-}
-
-type EstablishmentsInstance service
+type EstablishmentsService service
 
 // APIError encapsulated a general error coming from an API request. This is for
 // the cases which do not have specific errors.
@@ -123,7 +119,7 @@ type Establishment struct {
 // GetByID returns an establishment with the given FHRSID.
 //
 // https://api.ratings.food.gov.uk/Help/Api/GET-Establishments-id
-func (s *EstablishmentsInstance) GetByID(id string) (*Establishment, error) {
+func (s *EstablishmentsService) GetByID(id string) (*Establishment, error) {
 	url, err := s.client.baseURL.Parse(fmt.Sprintf("Establishments/%s", id))
 	if err != nil {
 		return nil, err

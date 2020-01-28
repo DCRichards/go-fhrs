@@ -31,7 +31,7 @@ type Client struct {
 	version    int
 	common     service // Reuse this for all services.
 
-	Establishments *EstablishmentsInstance
+	Establishments *EstablishmentsService
 }
 
 type service struct {
@@ -54,7 +54,7 @@ func NewClient() (*Client, error) {
 	}
 
 	client.common.client = client
-	client.Establishments = (*EstablishmentsInstance)(&client.common)
+	client.Establishments = (*EstablishmentsService)(&client.common)
 
 	return client, nil
 }
