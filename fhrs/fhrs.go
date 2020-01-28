@@ -123,7 +123,7 @@ func (c *Client) SetLanguage(l APILanguage) error {
 	return errors.New("Language not supported")
 }
 
-func (c *Client) get(url string, v interface{}) error {
+func (c *Client) get(url string, responseBody interface{}) error {
 	u, err := c.baseURL.Parse(url)
 	if err != nil {
 		return err
@@ -163,5 +163,5 @@ func (c *Client) get(url string, v interface{}) error {
 		}
 	}
 
-	return json.NewDecoder(res.Body).Decode(v)
+	return json.NewDecoder(res.Body).Decode(responseBody)
 }
