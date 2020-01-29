@@ -3,7 +3,7 @@ on: [push]
 jobs:
 
   test:
-    name: Build
+    name: test
     runs-on: ubuntu-latest
     steps:
 
@@ -19,5 +19,5 @@ jobs:
     - name: Get dependencies
       run: go mod download
 
-    - name: Test
+    - name: test
       run: go test ./...
