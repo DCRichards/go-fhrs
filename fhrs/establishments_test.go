@@ -70,6 +70,10 @@ func TestGetByID(t *testing.T) {
 	  ]
 	}`
 
+
+	rd, _ := time.Parse("2006-01-02T15:04:05", "2019-08-06T00:00:00")
+	ed, _ := time.Parse("2006-01-02T15:04:05", "0001-01-01T00:00:00")
+
 	expected := &Establishment{
 		FHRSID:                     82940,
 		LocalAuthorityBusinessID:   "2019",
@@ -81,6 +85,7 @@ func TestGetByID(t *testing.T) {
 		PostCode:                   "PO1 1BA",
 		RatingValue:                "3",
 		RatingKey:                  "fhrs_3_en-gb",
+		RatingDate:					Timestamp(rd),
 		LocalAuthorityCode:         "876",
 		LocalAuthorityName:         "Portsmouth",
 		LocalAuthorityWebSite:      "http://www.portsmouth.gov.uk",
@@ -94,6 +99,7 @@ func TestGetByID(t *testing.T) {
 		NewRatingPending: false,
 		Meta: Meta{
 			DataSource: "Lucene",
+			ExtractDate: Timestamp(ed),
 			ItemCount:  0,
 			Returncode: "OK",
 			TotalCount: 1,
@@ -108,8 +114,6 @@ func TestGetByID(t *testing.T) {
 			},
 		},
 	}
-	expected.RatingDate.Time, _ = time.Parse("2006-01-02T15:04:05", "2019-08-06T00:00:00")
-	expected.Meta.ExtractDate.Time, _ = time.Parse("2006-01-02T15:04:05", "0001-01-01T00:00:00")
 
 	idQuery := "1"
 

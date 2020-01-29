@@ -45,29 +45,41 @@ func (e APIError) Error() string {
 }
 
 // Timestamp is a representation of the date/time format used throughout the API.
-// It is a subset of RFC 3339, with the timezone (Zulu) omitted.
-type Timestamp struct {
-	time.Time
-}
+//
+// It is mostly RFC3339 with the timezone omitted, but this is not consistent, so
+// both variations can be parsed as JSON.
+type Timestamp time.Time
 
 func (t *Timestamp) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), "\"")
 	if s == "null" || s == "" || s == "undefined" {
-		*t = Timestamp{time.Time{}}
+		*t = Timestamp(time.Time{})
 		return nil
 	}
 
 	parsed, err := time.Parse("2006-01-02T15:04:05", s)
+	if err == nil {
+		*t = Timestamp(parsed)
+		return nil
+	}
+
+	// If we can't pase as the above, try RFC3339.
+	parsed, err = time.Parse(time.RFC3339, s)
 	if err != nil {
 		return err
 	}
 
-	*t = Timestamp{parsed}
+	*t = Timestamp(parsed)
 	return nil
 }
 
 func (t *Timestamp) MarshalJSON() ([]byte, error) {
-	return json.Marshal(t.Time.Format("2008-01-02T15:04:05"))
+	return json.Marshal(t)
+}
+
+func (t Timestamp) String() string {
+	ts := time.Time(t)
+	return ts.String()
 }
 
 type ErrorResponse struct {
@@ -112,12 +124,10 @@ func NewClient() (*Client, error) {
 
 // SetLanguage sets the response language.
 func (c *Client) SetLanguage(l APILanguage) error {
-	languages := []APILanguage{English, Cymraeg}
-	for _, lang := range languages {
-		if l == lang {
-			c.language = l
-			return nil
-		}
+	switch l {
+	case English, Cymraeg:
+		c.language = l
+		return nil
 	}
 
 	return errors.New("Language not supported")
