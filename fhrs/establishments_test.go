@@ -70,7 +70,6 @@ func TestGetByID(t *testing.T) {
 	  ]
 	}`
 
-
 	rd, _ := time.Parse("2006-01-02T15:04:05", "2019-08-06T00:00:00")
 	ed, _ := time.Parse("2006-01-02T15:04:05", "0001-01-01T00:00:00")
 
@@ -85,7 +84,7 @@ func TestGetByID(t *testing.T) {
 		PostCode:                   "PO1 1BA",
 		RatingValue:                "3",
 		RatingKey:                  "fhrs_3_en-gb",
-		RatingDate:					Timestamp(rd),
+		RatingDate:                 Timestamp(rd),
 		LocalAuthorityCode:         "876",
 		LocalAuthorityName:         "Portsmouth",
 		LocalAuthorityWebSite:      "http://www.portsmouth.gov.uk",
@@ -98,14 +97,14 @@ func TestGetByID(t *testing.T) {
 		},
 		NewRatingPending: false,
 		Meta: Meta{
-			DataSource: "Lucene",
+			DataSource:  "Lucene",
 			ExtractDate: Timestamp(ed),
-			ItemCount:  0,
-			Returncode: "OK",
-			TotalCount: 1,
-			TotalPages: 1,
-			PageSize:   1,
-			PageNumber: 1,
+			ItemCount:   0,
+			Returncode:  "OK",
+			TotalCount:  1,
+			TotalPages:  1,
+			PageSize:    1,
+			PageNumber:  1,
 		},
 		Links: []Link{
 			{
@@ -238,6 +237,322 @@ func TestGetByID_Headers(t *testing.T) {
 	}
 
 	_, err = client.Establishments.GetByID(idQuery)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSearch(t *testing.T) {
+	client, server, router, err := getTestEnv()
+	if err != nil {
+		t.Error(err)
+	}
+
+	server.Start()
+	defer server.Close()
+
+	body := `{
+	  "establishments":[
+		{
+		  "FHRSID":82940,
+		  "LocalAuthorityBusinessID":"2019",
+		  "BusinessName":"Ali's",
+		  "BusinessType":"Restaurant/Cafe/Canteen",
+		  "BusinessTypeID":1,
+		  "AddressLine1":"89 Commercial Road",
+		  "AddressLine2":"Portsmouth",
+		  "AddressLine3":"",
+		  "AddressLine4":"",
+		  "PostCode":"PO1 1BA",
+		  "Phone":"",
+		  "RatingValue":"3",
+		  "RatingKey":"fhrs_3_en-gb",
+		  "RatingDate":"2019-08-06T00:00:00",
+		  "LocalAuthorityCode":"876",
+		  "LocalAuthorityName":"Portsmouth",
+		  "LocalAuthorityWebSite":"http://www.portsmouth.gov.uk",
+		  "LocalAuthorityEmailAddress":"public.protection@portsmouthcc.gov.uk",
+		  "scores":{
+			"Hygiene":null,
+			"Structural":null,
+			"ConfidenceInManagement":null
+		  },
+		  "SchemeType":"FHRS",
+		  "geocode":{
+			"longitude":"-1.09159100055695",
+			"latitude":"50.7984199523926"
+		  },
+		  "RightToReply":"",
+		  "Distance":null,
+		  "NewRatingPending":false,
+		  "meta":{
+			"dataSource":"Lucene",
+			"extractDate":"0001-01-01T00:00:00",
+			"itemCount":0,
+			"returncode":"OK",
+			"totalCount":1,
+			"totalPages":1,
+			"pageSize":1,
+			"pageNumber":1
+		  },
+		  "links":[
+			{
+			  "rel":"self",
+			  "href":"http://api.ratings.food.gov.uk/establishments/82940"
+			}
+		  ]
+		}
+	  ],
+	  "meta":{
+		"dataSource":"Lucene",
+		"extractDate":"0001-01-01T00:00:00",
+		"itemCount":0,
+		"returncode":"OK",
+		"totalCount":1,
+		"totalPages":1,
+		"pageSize":1,
+		"pageNumber":1
+	  },
+	  "links":[
+		{
+		  "rel":"self",
+		  "href":"http://api.ratings.food.gov.uk/establishments"
+		}
+	  ]
+	}`
+
+	rd, _ := time.Parse("2006-01-02T15:04:05", "2019-08-06T00:00:00")
+	ed, _ := time.Parse("2006-01-02T15:04:05", "0001-01-01T00:00:00")
+
+	expected := &Establishments{
+		Establishments: []Establishment{
+			{
+				FHRSID:                     82940,
+				LocalAuthorityBusinessID:   "2019",
+				BusinessName:               "Ali's",
+				BusinessType:               "Restaurant/Cafe/Canteen",
+				BusinessTypeID:             1,
+				AddressLine1:               "89 Commercial Road",
+				AddressLine2:               "Portsmouth",
+				PostCode:                   "PO1 1BA",
+				RatingValue:                "3",
+				RatingKey:                  "fhrs_3_en-gb",
+				RatingDate:                 Timestamp(rd),
+				LocalAuthorityCode:         "876",
+				LocalAuthorityName:         "Portsmouth",
+				LocalAuthorityWebSite:      "http://www.portsmouth.gov.uk",
+				LocalAuthorityEmailAddress: "public.protection@portsmouthcc.gov.uk",
+				Scores:                     Scores{},
+				SchemeType:                 "FHRS",
+				Geocode: Geocode{
+					Longitude: "-1.09159100055695",
+					Latitude:  "50.7984199523926",
+				},
+				NewRatingPending: false,
+				Meta: Meta{
+					DataSource:  "Lucene",
+					ExtractDate: Timestamp(ed),
+					ItemCount:   0,
+					Returncode:  "OK",
+					TotalCount:  1,
+					TotalPages:  1,
+					PageSize:    1,
+					PageNumber:  1,
+				},
+				Links: []Link{
+					{
+						Rel:  "self",
+						Href: "http://api.ratings.food.gov.uk/establishments/82940",
+					},
+				},
+			},
+		},
+		Meta: Meta{
+			DataSource:  "Lucene",
+			ExtractDate: Timestamp(ed),
+			ItemCount:   0,
+			Returncode:  "OK",
+			TotalCount:  1,
+			TotalPages:  1,
+			PageSize:    1,
+			PageNumber:  1,
+		},
+		Links: []Link{
+			{
+				Rel:  "self",
+				Href: "http://api.ratings.food.gov.uk/establishments",
+			},
+		},
+	}
+
+	params := &SearchParams{
+		Name: "Ali's",
+	}
+
+	router.GET("/Establishments", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		q := r.URL.Query()
+		if q["name"][0] != params.Name {
+			t.Errorf("Expected param 'name' to equal %s but got %s", params.Name, q["name"][0])
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		io.WriteString(w, body)
+	})
+
+	actual, err := client.Establishments.Search(params)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(actual.Establishments) == 0 {
+		t.Error("Expected response but got nil")
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("Expected:\n%+v\nBut got:\n%+v\n", expected, actual)
+	}
+}
+
+func TestSearch_NoResults(t *testing.T) {
+	client, server, router, err := getTestEnv()
+	if err != nil {
+		t.Error(err)
+	}
+
+	server.Start()
+	defer server.Close()
+
+	body := `{
+	  "establishments": [],
+	  "meta":{
+		"dataSource":"Lucene",
+		"extractDate":"0001-01-01T00:00:00",
+		"itemCount":0,
+		"returncode":"OK",
+		"totalCount":1,
+		"totalPages":1,
+		"pageSize":1,
+		"pageNumber":1
+	  },
+	  "links":[
+		{
+		  "rel":"self",
+		  "href":"http://api.ratings.food.gov.uk/establishments"
+		}
+	  ]
+	}`
+
+	ed, _ := time.Parse("2006-01-02T15:04:05", "0001-01-01T00:00:00")
+
+	expected := &Establishments{
+		Establishments: []Establishment{},
+		Meta: Meta{
+			DataSource:  "Lucene",
+			ExtractDate: Timestamp(ed),
+			ItemCount:   0,
+			Returncode:  "OK",
+			TotalCount:  1,
+			TotalPages:  1,
+			PageSize:    1,
+			PageNumber:  1,
+		},
+		Links: []Link{
+			{
+				Rel:  "self",
+				Href: "http://api.ratings.food.gov.uk/establishments",
+			},
+		},
+	}
+
+	params := &SearchParams{
+		Address: "Obscurenameplace",
+	}
+
+	router.GET("/Establishments", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		q := r.URL.Query()
+		if q["address"][0] != params.Address {
+			t.Errorf("Expected param 'address' to equal %s but got %s", params.Address, q["address"][0])
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		io.WriteString(w, body)
+	})
+
+	actual, err := client.Establishments.Search(params)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("Expected:\n%+v\nBut got:\n%+v\n", expected, actual)
+	}
+}
+
+func TestSearch_Params(t *testing.T) {
+	client, server, router, err := getTestEnv()
+	if err != nil {
+		t.Error(err)
+	}
+
+	server.Start()
+	defer server.Close()
+
+	lat := 50.8261
+	lon := -0.8231
+	maxDistanceLimit := 10
+	pageNumber := 1
+	pageSize := 20
+
+	params := &SearchParams{
+		Name:              "Bob's Burgers",
+		Address:           "'Merica",
+		Longitude:         &lat,
+		Latitude:          &lon,
+		MaxDistanceLimit:  &maxDistanceLimit,
+		BusinessTypeID:    "10",
+		SchemeTypeKey:     "1",
+		RatingKey:         "AwatingInspection",
+		RatingOperatorKey: "LessThanOrEqual",
+		LocalAuthorityID:  "HCC",
+		CountryID:         "GB",
+		SortOptionKey:     "rating",
+		PageNumber:        &pageNumber,
+		PageSize:          &pageSize,
+	}
+
+	paramError := func(name string, expected interface{}, actual string) string {
+		return fmt.Sprintf("Expected param '%s' to be %v but got %s", name, expected, actual)
+	}
+
+	testValues := map[string]interface{}{
+		"name":              params.Name,
+		"address":           params.Address,
+		"longitude":         "50.8261",
+		"latitude":          "-0.8231",
+		"maxDistanceLimit":  "10",
+		"businessTypeId":    params.BusinessTypeID,
+		"schemeTypeKey":     params.SchemeTypeKey,
+		"ratingKey":         params.RatingKey,
+		"ratingOperatorKey": params.RatingOperatorKey,
+		"localAuthorityId":  params.LocalAuthorityID,
+		"countryId":         params.CountryID,
+		"sortOptionKey":     params.SortOptionKey,
+		"pageNumber":        "1",
+		"pageSize":          "20",
+	}
+
+	router.GET("/Establissments", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		q := r.URL.Query()
+
+		for p, expected := range testValues {
+			actual := q[p][0]
+			if actual != expected {
+				t.Errorf(paramError(p, expected, actual))
+			}
+		}
+	})
+
+	_, err = client.Establishments.Search(params)
 	if err != nil {
 		t.Error(err)
 	}

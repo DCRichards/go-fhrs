@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -162,7 +163,9 @@ func (c *Client) get(url string, responseBody interface{}) error {
 	case res.StatusCode < 200 || res.StatusCode >= 300:
 		var errorResponse ErrorResponse
 		if err := json.NewDecoder(res.Body).Decode(&errorResponse); err != nil {
-			return err
+			if err != io.EOF {
+				return err
+			}
 		}
 
 		return APIError{
@@ -173,5 +176,13 @@ func (c *Client) get(url string, responseBody interface{}) error {
 		}
 	}
 
-	return json.NewDecoder(res.Body).Decode(responseBody)
+	if err := json.NewDecoder(res.Body).Decode(responseBody); err != nil {
+		if err == io.EOF {
+			return nil
+		}
+
+		return err
+	}
+
+	return nil
 }
