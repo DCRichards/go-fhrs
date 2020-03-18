@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -17,12 +18,17 @@ const (
 	version  = 2
 )
 
+const (
+	ContentTypeJSON = "application/json"
+	ContentTypeHTML = "text/html"
+)
+
 // APILanguage represents the language API responses will be returned in.
 type APILanguage int
 
 const (
-	English APILanguage = iota // English (en-GB)
-	Cymraeg                    // Welsh (cy-GB)
+	LanguageEnglish APILanguage = iota // English (en-GB)
+	LanguageCymraeg                    // Welsh (cy-GB)
 )
 
 func (l APILanguage) String() string {
@@ -83,8 +89,27 @@ func (t Timestamp) String() string {
 	return ts.String()
 }
 
+// ErrorResponse is the body returned when an error occurs.
 type ErrorResponse struct {
 	Message string `json:"Message"`
+}
+
+// Meta is the metadata returned with most payloads in the API.
+type Meta struct {
+	DataSource  string    `json:"dataSource"`
+	ExtractDate Timestamp `json:"extractDate"`
+	ItemCount   int       `json:"itemCount"`
+	Returncode  string    `json:"returncode"`
+	TotalCount  int       `json:"totalCount"`
+	TotalPages  int       `json:"totalPages"`
+	PageSize    int       `json:"pageSize"`
+	PageNumber  int       `json:"pageNumber"`
+}
+
+// Link is the content link returned with most payloads in the API.
+type Link struct {
+	Rel  string `json:"rel"`
+	Href string `json:"href"`
 }
 
 // Client provides the entry point to all of the available services.
@@ -96,6 +121,7 @@ type Client struct {
 	common     service // Reuse this for all services.
 
 	Establishments *EstablishmentsService
+	Ratings        *RatingsService
 }
 
 type service struct {
@@ -119,6 +145,7 @@ func NewClient() (*Client, error) {
 
 	client.common.client = client
 	client.Establishments = (*EstablishmentsService)(&client.common)
+	client.Ratings = (*RatingsService)(&client.common)
 
 	return client, nil
 }
@@ -126,7 +153,7 @@ func NewClient() (*Client, error) {
 // SetLanguage sets the response language.
 func (c *Client) SetLanguage(l APILanguage) error {
 	switch l {
-	case English, Cymraeg:
+	case LanguageEnglish, LanguageCymraeg:
 		c.language = l
 		return nil
 	}
@@ -162,9 +189,21 @@ func (c *Client) get(url string, responseBody interface{}) error {
 	// Otherwise parse and return general API error.
 	case res.StatusCode < 200 || res.StatusCode >= 300:
 		var errorResponse ErrorResponse
-		if err := json.NewDecoder(res.Body).Decode(&errorResponse); err != nil {
-			if err != io.EOF {
+
+		if res.Header["Content-Type"][0] == ContentTypeHTML {
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
 				return err
+			}
+
+			errorResponse.Message = string(body)
+		}
+
+		if res.Header["Content-Type"][0] == ContentTypeJSON {
+			if err := json.NewDecoder(res.Body).Decode(&errorResponse); err != nil {
+				if err != io.EOF {
+					return err
+				}
 			}
 		}
 
