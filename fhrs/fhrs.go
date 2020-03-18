@@ -64,7 +64,7 @@ func (t *Timestamp) UnmarshalJSON(b []byte) error {
 		return nil
 	}
 
-	// If we can't pase as the above, try RFC3339.
+	// If we can't parse as the above, try RFC3339.
 	parsed, err = time.Parse(time.RFC3339, s)
 	if err != nil {
 		return err
