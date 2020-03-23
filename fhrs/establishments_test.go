@@ -232,7 +232,7 @@ func TestGetByID_Headers(t *testing.T) {
 		io.WriteString(w, body)
 	})
 
-	if err := client.SetLanguage(Cymraeg); err != nil {
+	if err := client.SetLanguage(LanguageCymraeg); err != nil {
 		t.Error(err)
 	}
 

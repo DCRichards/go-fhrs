@@ -28,22 +28,6 @@ type Geocode struct {
 	Latitude  string `json:"latitude"`
 }
 
-type Meta struct {
-	DataSource  string    `json:"dataSource"`
-	ExtractDate Timestamp `json:"extractDate"`
-	ItemCount   int       `json:"itemCount"`
-	Returncode  string    `json:"returncode"`
-	TotalCount  int       `json:"totalCount"`
-	TotalPages  int       `json:"totalPages"`
-	PageSize    int       `json:"pageSize"`
-	PageNumber  int       `json:"pageNumber"`
-}
-
-type Link struct {
-	Rel  string `json:"rel"`
-	Href string `json:"href"`
-}
-
 type Establishment struct {
 	FHRSID                     int       `json:"FHRSID"`
 	LocalAuthorityBusinessID   string    `json:"LocalAuthorityBusinessID"`

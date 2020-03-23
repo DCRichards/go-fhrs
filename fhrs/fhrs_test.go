@@ -44,7 +44,7 @@ func TestNewClient(t *testing.T) {
 		t.Error(err)
 	}
 
-	if c.language != English {
+	if c.language != LanguageEnglish {
 		t.Error("Expected default language to be English")
 	}
 }
@@ -55,12 +55,12 @@ func TestSetLanguage(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = c.SetLanguage(English)
+	err = c.SetLanguage(LanguageEnglish)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = c.SetLanguage(Cymraeg)
+	err = c.SetLanguage(LanguageCymraeg)
 	if err != nil {
 		t.Error(err)
 	}
@@ -76,8 +76,8 @@ func TestAPILanguageString(t *testing.T) {
 		want string
 		have string
 	}{
-		{want: "en-GB", have: English.String()},
-		{want: "cy-GB", have: Cymraeg.String()},
+		{want: "en-GB", have: LanguageEnglish.String()},
+		{want: "cy-GB", have: LanguageCymraeg.String()},
 	}
 
 	for _, c := range cases {
