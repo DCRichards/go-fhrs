@@ -1,5 +1,7 @@
 # go-fhrs
 
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/dcrichards/go-fhrs)](https://pkg.go.dev/github.com/dcrichards/go-fhrs)
+
 > 🍽  A Go client library for the UK [Food Hygiene Rating Scheme API](https://api.ratings.food.gov.uk/help).
 
 ## Usage
